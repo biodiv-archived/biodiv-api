@@ -2,6 +2,7 @@ package biodiv;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -10,7 +11,6 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,9 +67,14 @@ public class BiodivResponseFilter implements ContainerResponseFilter {
 		return retVal.toString();
 	}
 
+        /**
+         * Checks if origin matches with given URL's
+         * Note: Ionic application in device runs on localhost
+         * @param origin
+         * @return boolean
+         */
 	private boolean isValidOrigin(String origin) {
-		// TODO : ideally baseUri should be matched against given set of urls in
-		// config
-		return StringUtils.contains(origin, "indiabiodiversity.org") ? true : false;
+            String[] allowedOrigins = new String[]{"indiabiodiversity.org", "localhost"};
+            return Arrays.stream(allowedOrigins).anyMatch(origin::contains);
 	}
 }
