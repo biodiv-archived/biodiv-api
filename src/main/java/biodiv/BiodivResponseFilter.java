@@ -67,14 +67,18 @@ public class BiodivResponseFilter implements ContainerResponseFilter {
 		return retVal.toString();
 	}
 
-        /**
-         * Checks if origin matches with given URL's
-         * Note: Ionic application in device runs on localhost
-         * @param origin
-         * @return boolean
-         */
-	private boolean isValidOrigin(String origin) {
+    /**
+     * Checks if origin matches with given URL's Note: Ionic application in
+     * device runs on localhost
+     *
+     * @param origin
+     * @return boolean
+     */
+    private boolean isValidOrigin(String origin) {
+        if (origin != null) {
             String[] allowedOrigins = new String[]{"indiabiodiversity.org", "localhost"};
             return Arrays.stream(allowedOrigins).anyMatch(origin::contains);
-	}
+        }
+        return false;
+    }
 }
