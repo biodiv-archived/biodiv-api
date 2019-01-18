@@ -21,52 +21,41 @@ import biodiv.observation.RecommendationVoteDao;
 import biodiv.user.UserService;
 
 public class DataTableService extends AbstractService<DataTable> {
-	
-	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	private DataTableDao dataTableDao;
-	
-	@Inject
-	private UserService userService;
-	
-	@Inject
-	private ActivityFeedService activityFeedService;
-	
-	@Inject
-	private CommentService commentService;
-	
-	@Inject
-	DataTableService(DataTableDao dataTableDao){
-		super(dataTableDao);
-		this.dataTableDao = dataTableDao;
-	}
-	
-	@Inject
-	SessionFactory sessionFactory;
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    @Inject
+    SessionFactory sessionFactory;
+    private DataTableDao dataTableDao;
+    @Inject
+    private UserService userService;
+    @Inject
+    private ActivityFeedService activityFeedService;
+    @Inject
+    private CommentService commentService;
 
-	@Transactional
-	public List<List<String>> fetchColumnNames(DataTable dataTable) {
-		
-		List<List<String>> res = new ArrayList<List<String>>();
-		System.out.println("session Id "+System.identityHashCode(sessionFactory.getCurrentSession()));
-		if(dataTable.getColumns()!=null){
-			//org.json.JSONObject root = new org.json.JSONObject(dataTable.getColumns());
-			JSONArray root = new JSONArray(dataTable.getColumns());
-			for(int i=0 ; i< root.length() ; i++){
-				res.add((List<String>) root.get(i));
-			}
-			//Iterator<String> itr = root.length();
-			
-//			while(itr.hasNext()){
-//				res.add(itr.next());
-//			}
-		}
-		return res;
-	}
-	
-//	public static void main(String[] args){
-//		JSONArray root = new JSONArray("[[\"http://r...content-available-to-author-only...g.org/dwc/terms/scientificName\",\"elephus maximus\",10.1],[\"http://r...content-available-to-author-only...g.org/dwc/terms/vernacularName\",\"elephant\",10.2],[\"\",\"1\",1000.0],[\"\",\"media\",1000.0]]");
-//		System.out.println(root.get(0));
-//		
-//	}
+    @Inject
+    DataTableService(DataTableDao dataTableDao) {
+        super(dataTableDao);
+        this.dataTableDao = dataTableDao;
+    }
+
+    @Transactional
+    public List<List<String>> fetchColumnNames(DataTable dataTable) {
+        List<List<String>> res = new ArrayList<List<String>>();
+        String dtColumns = dataTable.getColumns();
+        if (dtColumns != null) {
+            JSONArray tColumns = new JSONArray(dtColumns);
+            Iterator tColumnsIt = tColumns.iterator();
+            while (tColumnsIt.hasNext()) {
+                JSONArray tRow = (JSONArray) tColumnsIt.next();
+                List cFieldList = new ArrayList();
+                Iterator tRowIt = tRow.iterator();
+                while (tRowIt.hasNext()) {
+                    cFieldList.add(tRowIt.next());
+                }
+                res.add(cFieldList);
+            }
+        }
+        return res;
+    }
 }
