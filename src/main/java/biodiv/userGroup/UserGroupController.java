@@ -87,7 +87,7 @@ public class UserGroupController {
 		CommonProfile profile = AuthUtils.currentUser(request);
 		String msg = userGroupService.posttoGroups(objectType, pullType, submitType, objectIds, userGroups,
 				Long.parseLong(profile.getId()), filterUrl);
-		return Utils.toJSONResponse(r);
+		return Utils.toJSONResponse(msg);
 	}
 
 	@Path("/{groupName}/{x}")
