@@ -21,6 +21,7 @@ import org.pac4j.jax.rs.annotations.Pac4JSecurity;
 import biodiv.Transactional;
 import biodiv.auth.AuthUtils;
 import biodiv.user.User;
+import biodiv.util.Utils;
 
 @Path("/userGroup")
 public class UserGroupController {
@@ -78,7 +79,7 @@ public class UserGroupController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Pac4JSecurity(clients = "cookieClient,headerClient", authorizers = "isAuthenticated")
 	@Transactional
-	public String bulkPost(@QueryParam("pullType") String pullType, @QueryParam("selectionType") String selectionType,
+	public Response bulkPost(@QueryParam("pullType") String pullType, @QueryParam("selectionType") String selectionType,
 			@QueryParam("objectType") String objectType, @QueryParam("objectIds") String objectIds,
 			@QueryParam("submitType") String submitType, @QueryParam("userGroups") String userGroups,
 			@QueryParam("filterUrl") String filterUrl, @Context HttpServletRequest request)
@@ -86,7 +87,7 @@ public class UserGroupController {
 		CommonProfile profile = AuthUtils.currentUser(request);
 		String msg = userGroupService.posttoGroups(objectType, pullType, submitType, objectIds, userGroups,
 				Long.parseLong(profile.getId()), filterUrl);
-		return msg;
+		return Utils.toJSONResponse(r);
 	}
 
 	@Path("/{groupName}/{x}")
