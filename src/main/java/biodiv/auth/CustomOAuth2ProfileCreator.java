@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.pac4j.core.context.WebContext;
@@ -35,11 +34,16 @@ import com.github.scribejava.core.model.Token;
 import biodiv.auth.token.TokenService;
 import biodiv.user.User;
 import biodiv.user.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.logging.Level;
 
 public class CustomOAuth2ProfileCreator<C extends OAuthCredentials, U extends CommonProfile, O extends OAuthConfiguration, T extends Token>
 		extends OAuth20ProfileCreator<OAuth20Profile> {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
+        private final String SKIP_REDIRECT = "skipRedirect";
 
 	@Inject
 	private UserService userService;
@@ -60,7 +64,14 @@ public class CustomOAuth2ProfileCreator<C extends OAuthCredentials, U extends Co
 	@Override
 	public OAuth20Profile create(final OAuth20Credentials credentials, final WebContext context) throws HttpAction {
 
-		boolean isActive = (sessionFactory.getCurrentSession().getTransaction() != null)
+        boolean skipRedirect = false;
+        if (context.getRequestParameters().containsKey(SKIP_REDIRECT)) {
+            if (context.getRequestParameter(SKIP_REDIRECT).equalsIgnoreCase("true")) {
+                skipRedirect = true;
+            }
+        }
+
+    	boolean isActive = (sessionFactory.getCurrentSession().getTransaction() != null)
 				? sessionFactory.getCurrentSession().getTransaction().isActive() : false;
 		if (!isActive) {
 			log.debug("Starting a new database transaction");
@@ -93,9 +104,11 @@ public class CustomOAuth2ProfileCreator<C extends OAuthCredentials, U extends Co
 				log.debug(result.toString());
 				UriBuilder targetURIForRedirection = UriBuilder.fromPath(config.getString("checkAuthUrl"));
 				Iterator it = result.entrySet().iterator();
+                JsonNode rootNode = mapper.createObjectNode();
 				while (it.hasNext()) {
 					Map.Entry pair = (Map.Entry) it.next();
                     if(pair.getValue() != null) {
+                        ((ObjectNode) rootNode).put(pair.getKey().toString(), pair.getValue().toString());
 					    targetURIForRedirection.queryParam((String) pair.getKey(), pair.getValue());
                     }
 					it.remove(); // avoids a ConcurrentModificationException
@@ -105,7 +118,19 @@ public class CustomOAuth2ProfileCreator<C extends OAuthCredentials, U extends Co
                     log.debug("Committing the database transaction");
                     sessionFactory.getCurrentSession().getTransaction().commit();
                 }
-				
+
+                String jsonResponseTmp;
+                try {
+                    if (skipRedirect) {
+                        jsonResponseTmp = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+                        throw HttpAction.ok("ok", context, jsonResponseTmp);
+                    } else {
+                        throw HttpAction.redirect("Could not find a user with email", context, targetURIForRedirection.toString());
+                    }
+                } catch (JsonProcessingException ex) {
+                    java.util.logging.Logger.getLogger(CustomOAuth2ProfileCreator.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
 				throw HttpAction.redirect("Redirecting user to login to biodiv system", context, targetURIForRedirection.toString());
 
 			} catch (NotFoundException e) {
@@ -190,10 +215,12 @@ public class CustomOAuth2ProfileCreator<C extends OAuthCredentials, U extends Co
 				log.error("Trying to register...");
 				UriBuilder uriBuilder = null;
 				URI targetURIForRedirection =  null;
+                JsonNode rootNode = mapper.createObjectNode();
 				try {
 					uriBuilder = UriBuilder
 							.fromUri(new URI(config.getString("createSocialAccountUrl")));
 					for (Map.Entry<String,String> entry : p.entrySet()) { 
+                        ((ObjectNode) rootNode).put(entry.getKey(), entry.getValue());
 			            uriBuilder.queryParam(entry.getKey(), entry.getValue());
 					}
 					targetURIForRedirection = uriBuilder.build();
@@ -202,8 +229,18 @@ public class CustomOAuth2ProfileCreator<C extends OAuthCredentials, U extends Co
 					e1.printStackTrace();
 				}				
 				
-				//throwsException(e.getMessage(), p);
-				throw HttpAction.redirect("Could not find a user with email", context, targetURIForRedirection.toString());
+                String jsonResponseTmp;
+                try {
+					if(skipRedirect){
+						jsonResponseTmp = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+						throw HttpAction.ok("ok", context, jsonResponseTmp);
+					}else{
+						throw HttpAction.redirect("Could not find a user with email", context, targetURIForRedirection.toString());
+					}
+                } catch (JsonProcessingException ex) {
+                    java.util.logging.Logger.getLogger(CustomOAuth2ProfileCreator.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				
 			}
 
 			//return oAuthProfile;
@@ -228,7 +265,7 @@ public class CustomOAuth2ProfileCreator<C extends OAuthCredentials, U extends Co
 //		} finally {
 //
 //		}
-
+        return null;
 	}
 
 	protected void throwsException(final String message, final Map<String, String> details)

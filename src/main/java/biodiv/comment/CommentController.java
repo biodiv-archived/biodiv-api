@@ -1,28 +1,26 @@
 package biodiv.comment;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import biodiv.Transactional;
+import biodiv.auth.AuthUtils;
+import biodiv.observation.Observation;
+import biodiv.observation.ObservationListService;
+import biodiv.observation.ObservationService;
+import biodiv.util.Utils;
+import net.minidev.json.JSONObject;
+import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.jax.rs.annotations.Pac4JSecurity;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.jax.rs.annotations.Pac4JProfile;
-import org.pac4j.jax.rs.annotations.Pac4JSecurity;
-
-import biodiv.Transactional;
-import biodiv.auth.AuthUtils;
-import biodiv.observation.Observation;
-import biodiv.observation.ObservationListService;
-import biodiv.observation.ObservationService;
-import net.minidev.json.JSONObject;
+import javax.ws.rs.core.Response;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Path("/comment")
 public class CommentController {
@@ -41,14 +39,14 @@ public class CommentController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Pac4JSecurity(clients = "cookieClient,headerClient", authorizers = "isAuthenticated")
 	@Transactional
-	public String addComment(@QueryParam("commentId") Long commentId, @QueryParam("commentBody") String commentBody,
-			@QueryParam("tagUserId") String tagUserId, @QueryParam("commentHolderId") Long commentHolderId,
-			@QueryParam("commentHolderType") String commentHolderType, @QueryParam("rootHolderId") Long rootHolderId,
-			@QueryParam("rootHolderType") String rootHolderType, @QueryParam("mainParentId") Long mainParentId,
-			@QueryParam("parentId") Long parentId, @QueryParam("subject") String subject,
-			@QueryParam("commentType") String commentType, @QueryParam("newerTimeRef") Long newerTimeRef,
-			@QueryParam("commentPostUrl") String commentPostUrl, @QueryParam("userLanguage") String userLang,
-			@Context HttpServletRequest request) throws NumberFormatException, Exception {
+	public Response addComment(@QueryParam("commentId") Long commentId, @QueryParam("commentBody") String commentBody,
+							   @QueryParam("tagUserId") String tagUserId, @QueryParam("commentHolderId") Long commentHolderId,
+							   @QueryParam("commentHolderType") String commentHolderType, @QueryParam("rootHolderId") Long rootHolderId,
+							   @QueryParam("rootHolderType") String rootHolderType, @QueryParam("mainParentId") Long mainParentId,
+							   @QueryParam("parentId") Long parentId, @QueryParam("subject") String subject,
+							   @QueryParam("commentType") String commentType, @QueryParam("newerTimeRef") Long newerTimeRef,
+							   @QueryParam("commentPostUrl") String commentPostUrl, @QueryParam("userLanguage") String userLang,
+							   @Context HttpServletRequest request) throws NumberFormatException, Exception {
 		
 		CommonProfile profile = AuthUtils.currentUser(request);
 		String msg;
@@ -77,7 +75,7 @@ public class CommentController {
 		} else {
 			msg = "error in comment body";
 		}
-		return msg;
+		return Utils.toJSONResponse(msg);
 
 	}
 
