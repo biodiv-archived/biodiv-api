@@ -1,6 +1,10 @@
 package biodiv.userGroup;
 
 import java.util.List;
+import java.util.ListIterator;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +28,7 @@ import biodiv.user.User;
 
 @Path("/userGroup")
 public class UserGroupController {
-	
+
 	@Inject
 	UserGroupService userGroupService;
 
@@ -32,20 +36,44 @@ public class UserGroupController {
 	private ResourceContext resourceContext;
 
 	@GET
-	@Path("/list")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Transactional
-	public List<UserGroup> list(@QueryParam("max") int max, @QueryParam("offset") int offset) {
-		List<UserGroup> usrGrp = null;
-		if (max == 0 && offset == 0) {
-			usrGrp = userGroupService.findAll();
-		} else if (max != 0 && offset == 0) {
-			usrGrp = userGroupService.findAll(max, 0);
-		} else {
-			usrGrp = userGroupService.findAll(max, offset);
-		}
-		return usrGrp;
-	}
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public List<UserGroup> list(@QueryParam("max") int max, @QueryParam("offset") int offset) {
+        return getUserList(max, offset);
+    }
+
+    @GET
+    @Path("/minimalList")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public String minimalList(@QueryParam("max") int max, @QueryParam("offset") int offset) {
+        List<UserGroup> usrGrp = null;
+        JSONArray mUserGroup = new JSONArray();
+        ListIterator<UserGroup> it = getUserList(max, offset).listIterator();
+        while (it.hasNext()) {
+            UserGroup t = it.next();
+            if (!t.isIsDeleted()) {
+                JSONObject jo = new JSONObject();
+                jo.put("id", t.getId());
+                jo.put("name", t.getName());
+                jo.put("domainName", t.getDomainName());
+                jo.put("webaddress", t.getWebaddress());
+                jo.put("icon", t.getIcon());
+                mUserGroup.put(jo);
+            }
+        }
+        return mUserGroup.toString();
+    }
+
+    public List<UserGroup> getUserList(int max, int offset) {
+        if (max == 0 && offset == 0) {
+            return userGroupService.findAll();
+        } else if (max != 0 && offset == 0) {
+            return userGroupService.findAll(max, 0);
+        }
+        return userGroupService.findAll(max, offset);
+    }
 
 	@GET
 	@Path("/{id}")
