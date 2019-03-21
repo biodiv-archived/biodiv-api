@@ -1,28 +1,22 @@
 package biodiv.userGroup;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.ResourceContext;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.MediaType;
-
-import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.jax.rs.annotations.Pac4JProfile;
-import org.pac4j.jax.rs.annotations.Pac4JSecurity;
-
 import biodiv.Transactional;
 import biodiv.auth.AuthUtils;
 import biodiv.user.User;
 import biodiv.util.Utils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.jax.rs.annotations.Pac4JSecurity;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.container.ResourceContext;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import java.util.List;
+import java.util.ListIterator;
 
 @Path("/userGroup")
 public class UserGroupController {
@@ -34,20 +28,44 @@ public class UserGroupController {
 	private ResourceContext resourceContext;
 
 	@GET
-	@Path("/list")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Transactional
-	public List<UserGroup> list(@QueryParam("max") int max, @QueryParam("offset") int offset) {
-		List<UserGroup> usrGrp = null;
-		if (max == 0 && offset == 0) {
-			usrGrp = userGroupService.findAll();
-		} else if (max != 0 && offset == 0) {
-			usrGrp = userGroupService.findAll(max, 0);
-		} else {
-			usrGrp = userGroupService.findAll(max, offset);
-		}
-		return usrGrp;
-	}
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public List<UserGroup> list(@QueryParam("max") int max, @QueryParam("offset") int offset) {
+        return getUserList(max, offset);
+    }
+
+    @GET
+    @Path("/minimalList")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public String minimalList(@QueryParam("max") int max, @QueryParam("offset") int offset) {
+        List<UserGroup> usrGrp = null;
+        JSONArray mUserGroup = new JSONArray();
+        ListIterator<UserGroup> it = getUserList(max, offset).listIterator();
+        while (it.hasNext()) {
+            UserGroup t = it.next();
+            if (!t.isIsDeleted()) {
+                JSONObject jo = new JSONObject();
+                jo.put("id", t.getId());
+                jo.put("name", t.getName());
+                jo.put("domainName", t.getDomainName());
+                jo.put("webaddress", t.getWebaddress());
+                jo.put("icon", t.getIcon());
+                mUserGroup.put(jo);
+            }
+        }
+        return mUserGroup.toString();
+    }
+
+    public List<UserGroup> getUserList(int max, int offset) {
+        if (max == 0 && offset == 0) {
+            return userGroupService.findAll();
+        } else if (max != 0 && offset == 0) {
+            return userGroupService.findAll(max, 0);
+        }
+        return userGroupService.findAll(max, offset);
+    }
 
 	@GET
 	@Path("/{id}")
