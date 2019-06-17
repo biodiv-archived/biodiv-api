@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -27,6 +28,7 @@ import org.pac4j.jax.rs.annotations.Pac4JSecurity;
 
 import biodiv.Transactional;
 import biodiv.auth.AuthUtils;
+import biodiv.maps.MapAggregationResponse;
 import biodiv.maps.MapBiodivResponse;
 import biodiv.maps.MapBoundParams;
 import biodiv.maps.MapBounds;
@@ -86,7 +88,69 @@ public class ObservationListController {
 		MapHttpResponse content = observationListService.fetch(index, type, documentId);
 		return content;
 	}
+	
+	@GET
+	@Path("/aggregation/{index}/{type}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public MapAggregationResponse aggregation(@PathParam("index") String index, @PathParam("type") String type,
+			@DefaultValue("") @QueryParam("sGroup") String sGroup, @DefaultValue("") @QueryParam("taxon") String taxon,
+			@DefaultValue("") @QueryParam("user") String user,
+			@DefaultValue("") @QueryParam("userGroupList") String userGroupList,
+			@DefaultValue("") @QueryParam("webaddress") String webaddress,
+			@DefaultValue("") @QueryParam("speciesName") String speciesName,
+			@DefaultValue("") @QueryParam("mediaFilter") String mediaFilter,
+			@DefaultValue("") @QueryParam("months") String months,
+			@DefaultValue("") @QueryParam("isFlagged") String isFlagged, @QueryParam("location") String location,
+			@DefaultValue("lastrevised") @QueryParam("sort") String sortOn, @QueryParam("minDate") String minDate,
+			@QueryParam("maxDate") String maxDate, @QueryParam("createdOnMaxDate") String createdOnMaxDate,
+			@QueryParam("createdOnMinDate") String createdOnMinDate, @QueryParam("status") String status,
+			@QueryParam("taxonId") String taxonId, @QueryParam("validate") String validate,
+			@QueryParam("recoName") String recoName,
+			@DefaultValue("265799") @QueryParam("classifdication") String classificationid,
+			@DefaultValue("10") @QueryParam("max") Integer max, @DefaultValue("0") @QueryParam("offset") Integer offset,
+			@DefaultValue("location") @QueryParam("geoAggregationField") String geoAggregationField,
+			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
+			@QueryParam("left") Double left, @QueryParam("right") Double right, @QueryParam("top") Double top,
+			@QueryParam("bottom") Double bottom, @QueryParam("recom") String maxvotedrecoid,
+			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
+			@QueryParam("termsAggregationField") String termsAggregationField, @Context UriInfo uriInfo,
+			String allParams) {
 
+		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+		// System.out.println(queryParams.get);
+		Map<String, List<String>> traitParams = queryParams.entrySet().stream()
+				.filter(entry -> entry.getKey().startsWith("trait"))
+				.collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+
+		Map<String, List<String>> customParams = queryParams.entrySet().stream()
+				.filter(entry -> entry.getKey().startsWith("custom"))
+				.collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+
+		MapSortType sortType = null;
+		MapBounds bounds = null;
+		if (top != null || bottom != null || left != null || right != null)
+			bounds = new MapBounds(top, left, bottom, right);
+		List<MapGeoPoint> polygon = new ArrayList<MapGeoPoint>();
+		if (location != null) {
+			double[] point = Stream.of(location.split(",")).mapToDouble(Double::parseDouble).toArray();
+			for (int i = 0; i < point.length; i = i + 2) {
+				String singlePoint = point[i + 1] + "," + point[i];
+				polygon.add(new MapGeoPoint(singlePoint));
+			}
+		}
+
+		MapBoundParams mapBoundsParams = new MapBoundParams(bounds, polygon);
+
+		MapSearchParams mapSearchParams = new MapSearchParams(offset, max, sortOn.toLowerCase(), sortType.DESC,
+				mapBoundsParams);
+
+		return observationListService.mapAggregate(index, type, sGroup, taxon, user, userGroupList, webaddress,
+				speciesName, mediaFilter, months, isFlagged, minDate, maxDate, validate, traitParams, customParams,
+				classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate, createdOnMinDate, status, taxonId,
+				recoName);
+	}
+	
 	@GET
 	@Path("/search/{index}/{type}")
 	@Produces(MediaType.APPLICATION_JSON)

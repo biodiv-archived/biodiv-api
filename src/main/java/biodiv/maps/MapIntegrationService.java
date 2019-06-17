@@ -211,7 +211,38 @@ public class MapIntegrationService {
 		return null;
 
 	}
+	
+	public MapNakshaAggregate postAggregation(String url, MapSearchQuery searchQuery) {
 
+		CloseableHttpResponse response = null;
+		try {
+			HttpPost post = new HttpPost(url);
+
+			String jsonData = objectMapper.writeValueAsString(searchQuery);
+			StringEntity entity = new StringEntity(jsonData, ContentType.APPLICATION_JSON);
+
+			post.setEntity(entity);
+
+			try {
+
+				CloseableHttpClient httpclient = HttpClients.createDefault();
+				response = httpclient.execute(post, context);
+				HttpEntity entity1 = response.getEntity();
+				String responseString = EntityUtils.toString(entity1);
+				ObjectMapper mapper = new ObjectMapper();
+				MapNakshaAggregate myObject = mapper.readValue(responseString, MapNakshaAggregate.class);
+
+				return myObject;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return null;
+	}
+	
 	private MapHttpResponse getMapHttpResponse(CloseableHttpResponse response) throws ParseException, IOException {
 
 		String message = null;
