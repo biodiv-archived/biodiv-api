@@ -1,6 +1,7 @@
 package biodiv.maps;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class MapAggregationResponse {
 
@@ -16,12 +17,7 @@ public class MapAggregationResponse {
 	private Long groupImages;
 	private Long groupNoMedia;
 	private HashMap<Object, Long> groupMonth;
-	private HashMap<Object, Long> groupPhenologyState;
-	private HashMap<Object, Long> groupAbundance;
-	private HashMap<Object, Long> groupSex;
-	private HashMap<Object, Long> groupLifeStage;
-	private HashMap<Object, Long> groupHabitatType;
-	private HashMap<Object, Long> groupLifeStageIncomplete;
+	private MapTraitsAggregation traits;
 
 	public HashMap<Object, Long> getGroupSpeciesName() {
 		return groupSpeciesName;
@@ -119,52 +115,12 @@ public class MapAggregationResponse {
 		this.groupMonth = groupMonth;
 	}
 
-	public HashMap<Object, Long> getGroupPhenologyState() {
-		return groupPhenologyState;
+	public MapTraitsAggregation getTraits() {
+		return traits;
 	}
 
-	public void setGroupPhenologyState(HashMap<Object, Long> groupPhenologyState) {
-		this.groupPhenologyState = groupPhenologyState;
-	}
-
-	public HashMap<Object, Long> getGroupAbundance() {
-		return groupAbundance;
-	}
-
-	public void setGroupAbundance(HashMap<Object, Long> groupAbundance) {
-		this.groupAbundance = groupAbundance;
-	}
-
-	public HashMap<Object, Long> getGroupSex() {
-		return groupSex;
-	}
-
-	public void setGroupSex(HashMap<Object, Long> groupSex) {
-		this.groupSex = groupSex;
-	}
-
-	public HashMap<Object, Long> getGroupLifeStage() {
-		return groupLifeStage;
-	}
-
-	public void setGroupLifeStage(HashMap<Object, Long> groupLifeStage) {
-		this.groupLifeStage = groupLifeStage;
-	}
-
-	public HashMap<Object, Long> getGroupHabitatType() {
-		return groupHabitatType;
-	}
-
-	public void setGroupHabitatType(HashMap<Object, Long> groupHabitatType) {
-		this.groupHabitatType = groupHabitatType;
-	}
-
-	public HashMap<Object, Long> getGroupLifeStageIncomplete() {
-		return groupLifeStageIncomplete;
-	}
-
-	public void setGroupLifeStageIncomplete(HashMap<Object, Long> groupLifeStageIncomplete) {
-		this.groupLifeStageIncomplete = groupLifeStageIncomplete;
+	public void setTraits(MapTraitsAggregation traits) {
+		this.traits = traits;
 	}
 
 }
