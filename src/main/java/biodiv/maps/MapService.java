@@ -33,12 +33,12 @@ public interface MapService {
 	MapDocument termsAggregation(String index, String type, String field, String locationField, Integer size,
 			MapSearchQuery mapSearchQuery);
 	
-	MapNakshaAggregate getAggregate(String index, String type,String filter, MapSearchQuery searchQuery);
+	MapNakshaAggregate getAggregate(String index, String type,String filter, String geoAggregationField,MapSearchQuery searchQuery);
 	
 	MapAggregationResponse mapAggregate(String index,String type,String sGroup, String taxon, String user, String userGroupList,
 			String webaddress, String speciesName, String mediaFilter, String months, String isFlagged, String minDate,
 			String maxDate, String validate, Map<String, List<String>> traitParams,
 			Map<String, List<String>> customParams, String classificationid, MapSearchParams mapSearchParams,
 			String maxvotedrecoid, String createdOnMaxDate, String createdOnMinDate, String status, String taxonId,
-			String recoName);
+			String recoName,String geoAggregationField);
 }

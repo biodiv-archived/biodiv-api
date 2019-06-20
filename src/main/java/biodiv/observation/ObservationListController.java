@@ -52,7 +52,7 @@ public class ObservationListController {
 	UserService userService;
 	@Inject
 	SchedulerService schedulerService;
-
+	
 	@POST
 	@Path("/{index}/{type}/{documentId}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -144,11 +144,11 @@ public class ObservationListController {
 
 		MapSearchParams mapSearchParams = new MapSearchParams(offset, max, sortOn.toLowerCase(), sortType.DESC,
 				mapBoundsParams);
-
+		
 		return observationListService.mapAggregate(index, type, sGroup, taxon, user, userGroupList, webaddress,
 				speciesName, mediaFilter, months, isFlagged, minDate, maxDate, validate, traitParams, customParams,
 				classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate, createdOnMinDate, status, taxonId,
-				recoName);
+				recoName,geoAggregationField);
 	}
 	
 	@GET

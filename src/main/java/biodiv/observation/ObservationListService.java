@@ -144,8 +144,8 @@ public class ObservationListService implements MapService {
 	}
 	
 	@Override
-	public MapNakshaAggregate getAggregate(String index, String type,String filter, MapSearchQuery searchQuery) {
-		String newurl= config.getString("nakshaUrl")+"/services/aggregation/" + index + "/" + type+"/"+filter;
+	public MapNakshaAggregate getAggregate(String index, String type,String filter,String geoAggregationField ,MapSearchQuery searchQuery) {
+		String newurl= config.getString("nakshaUrl")+"/services/aggregation/" + index + "/" + type+"/"+filter+"?geoAggregationField="+geoAggregationField;
 		log.debug("Searching at : {}", newurl);
 		return mapIntegrationService.postAggregation(newurl, searchQuery);
 	}
@@ -188,7 +188,7 @@ public class ObservationListService implements MapService {
 			String isFlagged, String minDate, String maxDate, String validate, Map<String, List<String>> traitParams,
 			Map<String, List<String>> customParams, String classificationid, MapSearchParams mapSearchParams,
 			String maxvotedrecoid, String createdOnMaxDate, String createdOnMinDate, String status, String taxonId,
-			String recoName) {
+			String recoName,String geoAggregationField) {
 		
 		MapSearchQuery mapSearchQuery = ObservationControllerHelper.getMapSearchQuery(sGroup, taxon, user,
 				userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
@@ -202,26 +202,26 @@ public class ObservationListService implements MapService {
 		MapAggregationResponse aggregationResponse = new MapAggregationResponse();
 		
 		
-		if(sGroup!=null && taxon!= null) {
+		if(sGroup!=null) {
 			
-			mapSearchQueryFilter = ObservationControllerHelper.getMapSearchQuery(omiter,omiter, user,
+			mapSearchQueryFilter = ObservationControllerHelper.getMapSearchQuery(omiter,taxon, user,
 					userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, taxonId, recoName);
-			aggregationResponse.setGroupSpeciesName(observationListService.getAggregate(index, type,"speciesgroupname.keyword", mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupSpeciesName(observationListService.getAggregate(index, type,"speciesgroupname.keyword", geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 		}
 		else {
-			aggregationResponse.setGroupSpeciesName(observationListService.getAggregate(index, type,"speciesgroupname.keyword", mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupSpeciesName(observationListService.getAggregate(index, type,"speciesgroupname.keyword", geoAggregationField,mapSearchQuery).getGroupAggregation());
 		}
 		if(status != null) {
 			mapSearchQueryFilter = ObservationControllerHelper.getMapSearchQuery(sGroup,taxon, user,
 					userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, omiter, taxonId, recoName);
-			aggregationResponse.setGroupStatus(observationListService.getAggregate(index, type, "status.keyword",mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupStatus(observationListService.getAggregate(index, type, "status.keyword",geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 		}
 		else {
-			aggregationResponse.setGroupStatus(observationListService.getAggregate(index, type, "status.keyword",mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupStatus(observationListService.getAggregate(index, type, "status.keyword",geoAggregationField,mapSearchQuery).getGroupAggregation());
 		}
 		if(userGroupList != null)
 		{
@@ -229,9 +229,9 @@ public class ObservationListService implements MapService {
 					omiter, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, taxonId, recoName);
-			aggregationResponse.setGroupUserGroupName(observationListService.getAggregate(index, type, "usergroupname.keyword",mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupUserGroupName(observationListService.getAggregate(index, type, "usergroupname.keyword",geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 		}else {
-			aggregationResponse.setGroupUserGroupName(observationListService.getAggregate(index, type, "usergroupname.keyword",mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupUserGroupName(observationListService.getAggregate(index, type, "usergroupname.keyword",geoAggregationField,mapSearchQuery).getGroupAggregation());
 		}
 		if(isFlagged != null)
 		{
@@ -239,9 +239,9 @@ public class ObservationListService implements MapService {
 					userGroupList, webaddress, speciesName, mediaFilter,months , omiter, minDate, maxDate, validate,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, taxonId, recoName);
-			aggregationResponse.setGroupFlag(observationListService.getAggregate(index, type, "flagcount",mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupFlag(observationListService.getAggregate(index, type, "flagcount",geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 		}else {
-			aggregationResponse.setGroupFlag(observationListService.getAggregate(index, type, "flagcount",mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupFlag(observationListService.getAggregate(index, type, "flagcount",geoAggregationField,mapSearchQuery).getGroupAggregation());
 		}
 		if(validate != null)
 		{
@@ -249,9 +249,9 @@ public class ObservationListService implements MapService {
 					userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, omiter,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, taxonId, recoName);
-			aggregationResponse.setGroupValidate(observationListService.getAggregate(index, type, "islocked",mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupValidate(observationListService.getAggregate(index, type, "islocked",geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 		}else {
-			aggregationResponse.setGroupValidate(observationListService.getAggregate(index, type, "islocked",mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupValidate(observationListService.getAggregate(index, type, "islocked",geoAggregationField,mapSearchQuery).getGroupAggregation());
 		}
 		if(months != null)
 		{
@@ -259,9 +259,9 @@ public class ObservationListService implements MapService {
 					userGroupList, webaddress, speciesName, mediaFilter,omiter , isFlagged, minDate, maxDate, validate,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, taxonId, recoName);
-			aggregationResponse.setGroupMonth(observationListService.getAggregate(index, type, "frommonth",mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupMonth(observationListService.getAggregate(index, type, "frommonth",geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 		}else {
-			aggregationResponse.setGroupMonth(observationListService.getAggregate(index, type, "frommonth",mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupMonth(observationListService.getAggregate(index, type, "frommonth",geoAggregationField,mapSearchQuery).getGroupAggregation());
 		}
 		if(mediaFilter != null) {
 			mapSearchQueryFilter = ObservationControllerHelper.getMapSearchQuery(sGroup,taxon, user,
@@ -269,17 +269,17 @@ public class ObservationListService implements MapService {
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, taxonId, recoName);
 			
-			aggregationResponse.setGroupAudio(getTotal(observationListService.getAggregate(index, type, "noofaudio", mapSearchQuery).getGroupAggregation()));
-			aggregationResponse.setGroupVideo(getTotal(observationListService.getAggregate(index, type, "noofvideos", mapSearchQuery).getGroupAggregation()));
-			aggregationResponse.setGroupImages(getTotal(observationListService.getAggregate(index, type, "noofimages", mapSearchQuery).getGroupAggregation()));
-			aggregationResponse.setGroupNoMedia(getTotal(observationListService.getAggregate(index, type, "nomedia.keyword", mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupAudio(getTotal(observationListService.getAggregate(index, type, "noofaudio", geoAggregationField,mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupVideo(getTotal(observationListService.getAggregate(index, type, "noofvideos",geoAggregationField, mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupImages(getTotal(observationListService.getAggregate(index, type, "noofimages", geoAggregationField,mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupNoMedia(getTotal(observationListService.getAggregate(index, type, "nomedia.keyword", geoAggregationField,mapSearchQuery).getGroupAggregation()));
 			
 		}
 		else {
-			aggregationResponse.setGroupAudio(getTotal(observationListService.getAggregate(index, type, "noofaudio", mapSearchQuery).getGroupAggregation()));
-			aggregationResponse.setGroupVideo(getTotal(observationListService.getAggregate(index, type, "noofvideos", mapSearchQuery).getGroupAggregation()));
-			aggregationResponse.setGroupImages(getTotal(observationListService.getAggregate(index, type, "noofimages", mapSearchQuery).getGroupAggregation()));
-			aggregationResponse.setGroupNoMedia(getTotal(observationListService.getAggregate(index, type, "nomedia.keyword", mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupAudio(getTotal(observationListService.getAggregate(index, type, "noofaudio",geoAggregationField, mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupVideo(getTotal(observationListService.getAggregate(index, type, "noofvideos",geoAggregationField, mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupImages(getTotal(observationListService.getAggregate(index, type, "noofimages", geoAggregationField,mapSearchQuery).getGroupAggregation()));
+			aggregationResponse.setGroupNoMedia(getTotal(observationListService.getAggregate(index, type, "nomedia.keyword", geoAggregationField,mapSearchQuery).getGroupAggregation()));
 			
 		}	
 		if(speciesName!=null) {
@@ -287,22 +287,22 @@ public class ObservationListService implements MapService {
 					userGroupList, webaddress, omiter, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, taxonId, recoName);
-			aggregationResponse.setGroupIdentificationNameExists(observationListService.getAggregate(index, type, "name", mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupIdentificationNameExists(observationListService.getAggregate(index, type, "name", geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 			
 		}
 		else {
-			aggregationResponse.setGroupIdentificationNameExists(observationListService.getAggregate(index, type, "name", mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupIdentificationNameExists(observationListService.getAggregate(index, type, "name", geoAggregationField,mapSearchQuery).getGroupAggregation());
 		}
 		if(taxonId!=null) {
 			mapSearchQueryFilter = ObservationControllerHelper.getMapSearchQuery(sGroup, taxon, user,
 					userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 					traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 					createdOnMinDate, status, omiter, recoName);
-			aggregationResponse.setGroupTaxonIDExists(observationListService.getAggregate(index, type, "status", mapSearchQueryFilter).getGroupAggregation());
+			aggregationResponse.setGroupTaxonIDExists(observationListService.getAggregate(index, type, "status", geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 			
 		}
 		else {
-			aggregationResponse.setGroupTaxonIDExists(observationListService.getAggregate(index, type, "status", mapSearchQuery).getGroupAggregation());
+			aggregationResponse.setGroupTaxonIDExists(observationListService.getAggregate(index, type, "status",geoAggregationField, mapSearchQuery).getGroupAggregation());
 		}
 		
 		if(!traitParams.isEmpty()) {
@@ -314,11 +314,11 @@ public class ObservationListService implements MapService {
 						userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 						traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 						createdOnMinDate, status, taxonId, recoName);
-				traitAggregation.setTrait_11(observationListService.getAggregate(index, type, "traits.trait_11.keyword", mapSearchQueryFilter).getGroupAggregation());
+				traitAggregation.setTrait_11(observationListService.getAggregate(index, type, "traits.trait_11.keyword", geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 				traitParams.put("trait_11.string", temp);
 			}
 			else {
-				traitAggregation.setTrait_11(observationListService.getAggregate(index, type, "traits.trait_11.keyword", mapSearchQuery).getGroupAggregation());
+				traitAggregation.setTrait_11(observationListService.getAggregate(index, type, "traits.trait_11.keyword",geoAggregationField, mapSearchQuery).getGroupAggregation());
 			}
 			if(traitParams.containsKey("trait_13.string")) {
 				temp = traitParams.remove("trait_13.string");
@@ -326,11 +326,11 @@ public class ObservationListService implements MapService {
 						userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 						traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 						createdOnMinDate, status, taxonId, recoName);
-				traitAggregation.setTrait_13(observationListService.getAggregate(index, type, "traits.trait_13.keyword", mapSearchQueryFilter).getGroupAggregation());
+				traitAggregation.setTrait_13(observationListService.getAggregate(index, type, "traits.trait_13.keyword",geoAggregationField, mapSearchQueryFilter).getGroupAggregation());
 				traitParams.put("trait_13.string", temp);
 			}
 			else {
-				traitAggregation.setTrait_13(observationListService.getAggregate(index, type, "traits.trait_13.keyword", mapSearchQuery).getGroupAggregation());
+				traitAggregation.setTrait_13(observationListService.getAggregate(index, type, "traits.trait_13.keyword", geoAggregationField,mapSearchQuery).getGroupAggregation());
 			}
 			if(traitParams.containsKey("trait_8.string")) {
 				temp = traitParams.remove("trait_8.string");
@@ -338,11 +338,11 @@ public class ObservationListService implements MapService {
 						userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 						traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 						createdOnMinDate, status, taxonId, recoName);
-				traitAggregation.setTrait_8(observationListService.getAggregate(index, type, "traits.trait_8.keyword", mapSearchQueryFilter).getGroupAggregation());
+				traitAggregation.setTrait_8(observationListService.getAggregate(index, type, "traits.trait_8.keyword",geoAggregationField, mapSearchQueryFilter).getGroupAggregation());
 				traitParams.put("trait_8.string", temp);
 			}
 			else {
-				traitAggregation.setTrait_8(observationListService.getAggregate(index, type, "traits.trait_8.keyword", mapSearchQuery).getGroupAggregation());
+				traitAggregation.setTrait_8(observationListService.getAggregate(index, type, "traits.trait_8.keyword",geoAggregationField, mapSearchQuery).getGroupAggregation());
 			}
 			if(traitParams.containsKey("trait_9.string")) {
 				temp = traitParams.remove("trait_9.string");
@@ -350,11 +350,11 @@ public class ObservationListService implements MapService {
 						userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 						traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 						createdOnMinDate, status, taxonId, recoName);
-				traitAggregation.setTrait_9(observationListService.getAggregate(index, type, "traits.trait_9.keyword", mapSearchQueryFilter).getGroupAggregation());
+				traitAggregation.setTrait_9(observationListService.getAggregate(index, type, "traits.trait_9.keyword",geoAggregationField, mapSearchQueryFilter).getGroupAggregation());
 				traitParams.put("trait_9.string", temp);
 			}
 			else {
-				traitAggregation.setTrait_9(observationListService.getAggregate(index, type, "traits.trait_9.keyword", mapSearchQuery).getGroupAggregation());
+				traitAggregation.setTrait_9(observationListService.getAggregate(index, type, "traits.trait_9.keyword",geoAggregationField, mapSearchQuery).getGroupAggregation());
 			}
 			if(traitParams.containsKey("trait_12.string")) {
 				temp = traitParams.remove("trait_12.string");
@@ -362,11 +362,11 @@ public class ObservationListService implements MapService {
 						userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 						traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 						createdOnMinDate, status, taxonId, recoName);
-				traitAggregation.setTrait_12(observationListService.getAggregate(index, type, "traits.trait_12.keyword", mapSearchQueryFilter).getGroupAggregation());
+				traitAggregation.setTrait_12(observationListService.getAggregate(index, type, "traits.trait_12.keyword", geoAggregationField,mapSearchQueryFilter).getGroupAggregation());
 				traitParams.put("trait_12.string", temp);
 			}
 			else {
-				traitAggregation.setTrait_12(observationListService.getAggregate(index, type, "traits.trait_12.keyword", mapSearchQuery).getGroupAggregation());
+				traitAggregation.setTrait_12(observationListService.getAggregate(index, type, "traits.trait_12.keyword",geoAggregationField, mapSearchQuery).getGroupAggregation());
 			}
 			if(traitParams.containsKey("trait_10.string")) {
 				temp = traitParams.remove("trait_10.string");
@@ -374,23 +374,23 @@ public class ObservationListService implements MapService {
 						userGroupList, webaddress, speciesName, mediaFilter,months , isFlagged, minDate, maxDate, validate,
 						traitParams, customParams, classificationid, mapSearchParams, maxvotedrecoid, createdOnMaxDate,
 						createdOnMinDate, status, taxonId, recoName);
-				traitAggregation.setTrait_10(observationListService.getAggregate(index, type, "traits.trait_10.keyword", mapSearchQueryFilter).getGroupAggregation());
+				traitAggregation.setTrait_10(observationListService.getAggregate(index, type, "traits.trait_10.keyword",geoAggregationField, mapSearchQueryFilter).getGroupAggregation());
 				traitParams.put("trait_10.string", temp);
 			}
 			else {
-				traitAggregation.setTrait_10(observationListService.getAggregate(index, type, "traits.trait_10.keyword", mapSearchQuery).getGroupAggregation());
+				traitAggregation.setTrait_10(observationListService.getAggregate(index, type, "traits.trait_10.keyword", geoAggregationField,mapSearchQuery).getGroupAggregation());
 			}
 			
 			aggregationResponse.setTraits(traitAggregation);
 		}
 		else {
 			MapTraitsAggregation traitAggregation = new MapTraitsAggregation();
-			traitAggregation.setTrait_11(observationListService.getAggregate(index, type, "traits.trait_11.keyword", mapSearchQuery).getGroupAggregation());
-			traitAggregation.setTrait_13(observationListService.getAggregate(index, type, "traits.trait_13.keyword", mapSearchQuery).getGroupAggregation());
-			traitAggregation.setTrait_8(observationListService.getAggregate(index, type,"traits.trait_8.keyword" , mapSearchQuery).getGroupAggregation());
-			traitAggregation.setTrait_9(observationListService.getAggregate(index, type, "traits.trait_9.keyword", mapSearchQuery).getGroupAggregation());
-			traitAggregation.setTrait_12(observationListService.getAggregate(index, type, "traits.trait_12.keyword", mapSearchQuery).getGroupAggregation());
-			traitAggregation.setTrait_10(observationListService.getAggregate(index, type, "traits.trait_10.keyword", mapSearchQuery).getGroupAggregation());
+			traitAggregation.setTrait_11(observationListService.getAggregate(index, type, "traits.trait_11.keyword", geoAggregationField,mapSearchQuery).getGroupAggregation());
+			traitAggregation.setTrait_13(observationListService.getAggregate(index, type, "traits.trait_13.keyword",geoAggregationField, mapSearchQuery).getGroupAggregation());
+			traitAggregation.setTrait_8(observationListService.getAggregate(index, type,"traits.trait_8.keyword" ,geoAggregationField, mapSearchQuery).getGroupAggregation());
+			traitAggregation.setTrait_9(observationListService.getAggregate(index, type, "traits.trait_9.keyword",geoAggregationField, mapSearchQuery).getGroupAggregation());
+			traitAggregation.setTrait_12(observationListService.getAggregate(index, type, "traits.trait_12.keyword",geoAggregationField, mapSearchQuery).getGroupAggregation());
+			traitAggregation.setTrait_10(observationListService.getAggregate(index, type, "traits.trait_10.keyword", geoAggregationField,mapSearchQuery).getGroupAggregation());
 			aggregationResponse.setTraits(traitAggregation);
 		}
 		
