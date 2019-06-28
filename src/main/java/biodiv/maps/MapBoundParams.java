@@ -34,6 +34,7 @@ public class MapBoundParams {
 
 	@Override
 	public String toString() {
-		return "MapBoundParams [bounds=" + bounds.toString() + ", polygons=" + polygon + "]";
+		return "MapBoundParams [bounds=" + bounds + ", polygon=" + polygon + "]";
 	}
+
 }
