@@ -553,7 +553,7 @@ public class AdminService {
 	private void postToElastic(List<Map<String, Object>> data_to_elastic, String index) {
 		// TODO Auto-generated method stub
 		CloseableHttpResponse response = null;
-		String url = config.getString("nakshaUrl") + "/services/bulk-upload/"+index+"/"+index;
+		String url = config.getString("esmodule.url") + "/v1/services/bulk-upload/"+index+"/"+index;
 		try {
 			HttpPost post = new HttpPost(url);
 			String jsonData = objectMapper.writeValueAsString(data_to_elastic);
