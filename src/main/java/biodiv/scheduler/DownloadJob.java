@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import biodiv.admin.AdminService;
-import biodiv.common.NakshaUrlService;
+import biodiv.common.ESmoduleUrlService;
 import biodiv.mail.DownloadMailingService;
 import biodiv.maps.MapHttpResponse;
 import biodiv.maps.MapIntegrationService;
@@ -40,7 +40,7 @@ public class DownloadJob implements Job {
 	DownloadLogService downloadLogService;
 
 	@Inject
-	NakshaUrlService nakshaUrlService;
+	ESmoduleUrlService esmoduleUrlService;
 	@Inject
 	AdminService adminService;
 
@@ -71,7 +71,7 @@ public class DownloadJob implements Job {
 		DownloadLog downloadLog = new DownloadLog(user, filterUrl, notes, status, type, sourceType, 0);
 		downloadLogService.save(downloadLog);
 
-		String url = nakshaUrlService.getDownloadUrl(index, indexType, geoField);
+		String url = esmoduleUrlService.getDownloadUrl(index, indexType, geoField);
 		MapHttpResponse httpResponse = mapIntegrationService.postRequest(url, mapSearchQuery);
 		
 		String filePath = null;

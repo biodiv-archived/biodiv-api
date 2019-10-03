@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module.Feature;
+import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.google.inject.Injector;
 
@@ -149,7 +150,8 @@ public class BiodivApplication extends ResourceConfig {// javax.ws.rs.core.Appli
 
 				newRC.register(provider);
 
-				newRC.register(org.glassfish.jersey.jackson.JacksonFeature.class);
+				newRC.register(JacksonFeatures.class);
+//				newRC.register(org.glassfish.jersey.jackson.JacksonFeature.class);
 				newRC.register(biodiv.CustomLoggingFilter.class);
 				
 				newRC.property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
@@ -240,50 +242,53 @@ public class BiodivApplication extends ResourceConfig {// javax.ws.rs.core.Appli
 	public void setGetConfig(Map<String, Object> getConfig) {
 		this.getConfig = getConfig;
 	}
+
 	/**
-     * Custom configuration of validation. This configuration defines custom:
-     * <ul>
-     *     <li>ConstraintValidationFactory - so that validators are able to inject Jersey providers/resources.</li>
-     *     <li>ParameterNameProvider - if method input parameters are invalid, this class returns actual parameter names
-     *     instead of the default ones ({@code arg0, arg1, ..})</li>
-     * </ul>
-     */
-    public static class ValidationConfigurationContextResolver implements ContextResolver<ValidationConfig> {
+	 * Custom configuration of validation. This configuration defines custom:
+	 * <ul>
+	 * <li>ConstraintValidationFactory - so that validators are able to inject
+	 * Jersey providers/resources.</li>
+	 * <li>ParameterNameProvider - if method input parameters are invalid, this
+	 * class returns actual parameter names instead of the default ones
+	 * ({@code arg0, arg1, ..})</li>
+	 * </ul>
+	 */
+	public static class ValidationConfigurationContextResolver implements ContextResolver<ValidationConfig> {
 
-        @Context
-        private ResourceContext resourceContext;
+		@Context
+		private ResourceContext resourceContext;
 
-        @Override
-        public ValidationConfig getContext(final Class<?> type) {
-            return new ValidationConfig()
-                    .constraintValidatorFactory(resourceContext.getResource(InjectingConstraintValidatorFactory.class))
-                    .parameterNameProvider(new CustomParameterNameProvider());
-        }
+		@Override
+		public ValidationConfig getContext(final Class<?> type) {
+			return new ValidationConfig()
+					.constraintValidatorFactory(resourceContext.getResource(InjectingConstraintValidatorFactory.class))
+					.parameterNameProvider(new CustomParameterNameProvider());
+		}
 
-        /**
-         * See ContactCardTest#testAddInvalidContact.
-         */
-        private class CustomParameterNameProvider implements ParameterNameProvider {
+		/**
+		 * See ContactCardTest#testAddInvalidContact.
+		 */
+		private class CustomParameterNameProvider implements ParameterNameProvider {
 
-            private final ParameterNameProvider nameProvider;
+			private final ParameterNameProvider nameProvider;
 
-            public CustomParameterNameProvider() {
-                nameProvider = Validation.byDefaultProvider().configure().getDefaultParameterNameProvider();
-            }
+			public CustomParameterNameProvider() {
+				nameProvider = Validation.byDefaultProvider().configure().getDefaultParameterNameProvider();
+			}
 
-            @Override
-            public List<String> getParameterNames(final Constructor<?> constructor) {
-                return nameProvider.getParameterNames(constructor);
-            }
+			@Override
+			public List<String> getParameterNames(final Constructor<?> constructor) {
+				return nameProvider.getParameterNames(constructor);
+			}
 
-            @Override
-            public List<String> getParameterNames(final Method method) {
-                // See ContactCardTest#testAddInvalidContact.
-                //if ("addContact".equals(method.getName())) {
-                //    return Arrays.asList("contact");
-                //}
-                return nameProvider.getParameterNames(method);
-            }
-        }
-    }
+			@Override
+			public List<String> getParameterNames(final Method method) {
+				// See ContactCardTest#testAddInvalidContact.
+				// if ("addContact".equals(method.getName())) {
+				// return Arrays.asList("contact");
+				// }
+				return nameProvider.getParameterNames(method);
+			}
+		}
+	}
 }

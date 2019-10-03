@@ -29,7 +29,7 @@ public class MapSearchParams {
 	 */
 	private MapBoundParams mapBoundParams;
 
-    public MapSearchParams() {}
+	public MapSearchParams() {}
 	public MapSearchParams(Integer from, Integer limit, String sortOn, MapSortType sortType) {
 		super();
 		this.from = from;
@@ -90,7 +90,7 @@ public class MapSearchParams {
 	@Override
 	public String toString() {
 		return "MapSearchParams [from=" + from + ", limit=" + limit + ", sortOn=" + sortOn + ", sortType=" + sortType
-				+ ", mapBoundParams=" + mapBoundParams.toString() + "]";
+				+ ", mapBoundParams=" + mapBoundParams + "]";
 	}
-	
+
 }

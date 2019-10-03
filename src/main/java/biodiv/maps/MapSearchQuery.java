@@ -125,7 +125,7 @@ public class MapSearchQuery {
 		return "MapSearchQuery [andBoolQueries=" + andBoolQueries + ", orBoolQueries=" + orBoolQueries
 				+ ", andRangeQueries=" + andRangeQueries + ", orRangeQueries=" + orRangeQueries + ", andExistQueries="
 				+ andExistQueries + ", andMatchPhraseQueries=" + andMatchPhraseQueries + ", orMatchPhraseQueries="
-				+ orMatchPhraseQueries + ", searchParams=" + searchParams.toString() + "]";
+				+ orMatchPhraseQueries + ", searchParams=" + searchParams + "]";
 	}
 
 }
